@@ -282,8 +282,10 @@ func (rq *ResourceQuotaController) Run(workers int, stopCh <-chan struct{}) {
 
 	// the workers that chug through the quota calculation backlog
 	for i := 0; i < workers; i++ {
-		go wait.Until(rq.worker(rq.queue), time.Second, stopCh)
-		go wait.Until(rq.worker(rq.missingUsageQueue), time.Second, stopCh)
+		go wait.Until(rq.worker(rq.queue), 100 * time.Millisecond, stopCh)
+		go wait.Until(rq.worker(rq.missingUsageQueue), 100 * time.Millisecond, stopCh)
+		//go wait.Until(rq.worker(rq.queue), time.Second, stopCh)
+		//go wait.Until(rq.worker(rq.missingUsageQueue), time.Second, stopCh)
 	}
 	// the timer for how often we do a full recalculation across all quotas
 	go wait.Until(func() { rq.enqueueAll() }, rq.resyncPeriod(), stopCh)

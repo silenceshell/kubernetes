@@ -809,6 +809,14 @@ func DeploymentTimedOut(deployment *apps.Deployment, newStatus *apps.DeploymentS
 	return timedOut
 }
 
+func max(x, y int32) int32 {
+	if x > y {
+		return x
+	} else {
+		return y
+	}
+}
+
 // NewRSNewReplicas calculates the number of replicas a deployment's new RS should have.
 // When one of the followings is true, we're rolling out the deployment; otherwise, we're scaling it.
 // 1) The new RS is saturated: newRS's replicas == deployment's replicas
@@ -822,7 +830,7 @@ func NewRSNewReplicas(deployment *apps.Deployment, allRSs []*apps.ReplicaSet, ne
 			return 0, err
 		}
 		// Find the total number of pods
-		currentPodCount := GetReplicaCountForReplicaSets(allRSs)
+		currentPodCount := max(GetReplicaCountForReplicaSets(allRSs), GetAvailableReplicaCountForReplicaSets(allRSs))
 		maxTotalPods := *(deployment.Spec.Replicas) + int32(maxSurge)
 		if currentPodCount >= maxTotalPods {
 			// Cannot scale up.
