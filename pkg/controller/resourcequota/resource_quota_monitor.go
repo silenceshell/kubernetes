@@ -142,6 +142,19 @@ func (qm *QuotaMonitor) controllerFor(resource schema.GroupVersionResource) (cac
 			case schema.GroupResource{Resource: "pods"}:
 				oldPod := oldObj.(*v1.Pod)
 				newPod := newObj.(*v1.Pod)
+				var oldDeletionGracePeriodSeconds int64 = 0
+				if oldPod.DeletionGracePeriodSeconds != nil {
+					oldDeletionGracePeriodSeconds = *oldPod.DeletionGracePeriodSeconds
+				}
+				var newDeletionGracePeriodSeconds int64 = 0
+				if newPod.DeletionGracePeriodSeconds != nil {
+					newDeletionGracePeriodSeconds = *newPod.DeletionGracePeriodSeconds
+				}
+				klog.V(4).Infof("oldPod info phase %v, DeletionTimestamp %v, DeletionGracePeriodSeconds %v",
+					oldPod.Status.Phase, oldPod.DeletionTimestamp, oldDeletionGracePeriodSeconds)
+				klog.V(4).Infof("newPod info phase %v, DeletionTimestamp %v, DeletionGracePeriodSeconds %v",
+					newPod.Status.Phase, newPod.DeletionTimestamp, newDeletionGracePeriodSeconds)
+
 				notifyUpdate = core.QuotaV1Pod(oldPod, clock) && !core.QuotaV1Pod(newPod, clock)
 			case schema.GroupResource{Resource: "services"}:
 				oldService := oldObj.(*v1.Service)
